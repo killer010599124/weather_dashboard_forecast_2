@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import assets from '../assets';
 import MinuteCard from './minCard';
 
 const SessionCard = ({ sessionData }) => {

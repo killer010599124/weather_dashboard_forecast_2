@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import assets from '../assets';
 
 const MinuteCard = ({ hourData }) => {
     // console.log(minuteData)

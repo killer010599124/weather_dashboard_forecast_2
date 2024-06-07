@@ -1,5 +1,4 @@
 import React from 'react';
-import assets from '../assets';
 
 const WeatherComponent = ({ date, weatherImage, weatherState, weatherData }) => {
   return (
