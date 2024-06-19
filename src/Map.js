@@ -119,7 +119,7 @@ const Map = () => {
               if (minute.reflectivity == null) reflectivity = 0
               else reflectivity = minute.reflectivity;
               newReflectivityData.push(reflectivity);
-              timeStep.push(minute.datetime.slice(0,5))
+              timeStep.push(minute.datetime.slice(0, 5))
               // newReflectivityData.push(minute.datetime.slice(0, 5));
             }
           }
@@ -216,30 +216,34 @@ const Map = () => {
   }
 
   function convertRadarTimestamp(isoTimestamp) {
-    const date = new Date(isoTimestamp);
-    const year = date.getFullYear();
-    const month = date.getMonth()
-    const day = date.getDate();
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
 
-    // Truncate to the nearest 10-minute interval
-    minutes = Math.floor(minutes / 10) * 10;
+    // Get the current time in the United States
+    const timestamp = new Date();
+    // Format the time in the US Eastern Time Zone
+    const currentUSTime = timestamp.toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric"
+    });
 
-    // If less than half of the interval has passed, subtract another interval
-    if (date.getMinutes() - minutes < 5) {
-      minutes -= 10;
-      if (minutes < 0) {
-        minutes = 50;
-        hours--;
-      }
-    }
+    console.log("Current time in the US:", currentUSTime);
 
-    const formattedHours = String(hours).padStart(2, '0');
-    const formattedMinutes = String(minutes).padStart(2, '0');
-    const formattedMonth = String(month).padStart(2, '0');
-    const formattedDay = String(day).padStart(2, '0');
-    return `${year}${formattedMonth}${formattedDay}${formattedHours}${formattedMinutes}`;
+    const dateTime = new Date(currentUSTime);
+
+    // Format the date and time to the desired format
+    const year = dateTime.getFullYear().toString();
+    const month = (dateTime.getMonth() + 1).toString().padStart(2, '0');
+    const day = dateTime.getDate().toString().padStart(2, '0');
+    const hours = dateTime.getHours().toString().padStart(2, '0');
+    const minutes = dateTime.getMinutes().toString().padStart(2, '0');
+    const formattedDateTime = `${year}${month}${day}${hours}${minutes}`;
+
+    console.log(formattedDateTime);
+
+    return formattedDateTime;
   }
 
 
@@ -318,26 +322,26 @@ const Map = () => {
     map_API_Location2Geo(currentLocation)
   }, [currentLocation])
 
-  useEffect(() => {
-    if (radarTile != null) {
+  // useEffect(() => {
+  //   if (radarTile != null) {
 
-      mapRef.current.addSource('radar', {
-        type: 'raster',
-        tiles: ['https://weather1.visualcrossing.com/VisualCrossingWebServices/rest/services/retrievetile/reflectivity/{z}/{x}/{y}/202406041120?key=ZMM2U9XUSJ6UV37L4L49NQACY&model=weatherRadarSubhourly_location&altitude=0&refresh=true&nocache=1715977236564'],
-        tileSize: 256,
-        attribution: '&copy; <a href="https://www.visualcrossing.comp</a> Visual Crossing'
-      });
-      mapRef.current.addLayer({
-        id: 'custom-tiles',
-        type: 'raster',
-        source: 'radar',
-        'layout': {
-          'visibility': 'visible'
-        },
-        paint: {}
-      });
-    }
-  }, [radarTile])
+  //     mapRef.current.addSource('radar', {
+  //       type: 'raster',
+  //       tiles: ['https://weather1.visualcrossing.com/VisualCrossingWebServices/rest/services/retrievetile/reflectivity/{z}/{x}/{y}/202406041120?key=ZMM2U9XUSJ6UV37L4L49NQACY&model=weatherRadarSubhourly_location&altitude=0&refresh=true&nocache=1715977236564'],
+  //       tileSize: 256,
+  //       attribution: '&copy; <a href="https://www.visualcrossing.comp</a> Visual Crossing'
+  //     });
+  //     mapRef.current.addLayer({
+  //       id: 'custom-tiles',
+  //       type: 'raster',
+  //       source: 'radar',
+  //       'layout': {
+  //         'visibility': 'visible'
+  //       },
+  //       paint: {}
+  //     });
+  //   }
+  // }, [radarTile])
 
   useEffect(() => {
     if (mapRef.current != null) {
@@ -350,7 +354,8 @@ const Map = () => {
         mapRef.current.removeSource('radar' + +convertRadarTimestamp(preRadarTime.toISOString()))
       }
 
-      const tiles = `https://weather1.visualcrossing.com/VisualCrossingWebServices/rest/services/retrievetile/reflectivity/{z}/{x}/{y}/${convertRadarTimestamp(radarTime.toISOString())}?key=ZMM2U9XUSJ6UV37L4L49NQACY&model=weatherRadarSubhourly_location&altitude=0&refresh=true&nocache=1715977236564`
+      const tiles = `https://weather1.visualcrossing.com/VisualCrossingWebServices/rest/services/retrievetile/reflectivity/{z}/{x}/{y}/${convertRadarTimestamp(radarTime.toISOString())}?key=ZMM2U9XUSJ6UV37L4L49NQACY&model=weatherRadarSubhourly_location&altitude=0&refresh=true`
+      //  const tiles = `https://weather1.visualcrossing.com/VisualCrossingWebServices/rest/services/retrievetile/reflectivity/{z}/{x}/{y}/202406191640?key=ZMM2U9XUSJ6UV37L4L49NQACY&model=weatherRadarSubhourly_location&altitude=0&refresh=true`
 
       mapRef.current.addSource('radar' + convertRadarTimestamp(radarTime.toISOString()), {
         type: 'raster',
@@ -379,7 +384,7 @@ const Map = () => {
       isInitialMount.current = false;
     } else {
 
-      getRadarTiles()
+      // getRadarTiles()
       const map = new mapboxgl.Map({
         container: mapContainerRef.current,
         style: 'mapbox://styles/mapbox/satellite-streets-v12',
@@ -435,25 +440,25 @@ const Map = () => {
     }
   }
 
-  async function getRadarTiles() {
-    const currentTime = new Date().toISOString();
-    let config = {
-      method: 'get',
-      maxBodyLength: Infinity,
-      url: `https://weather1.visualcrossing.com/VisualCrossingWebServices/rest/services/retrievetile/reflectivity/6/13/25/202405172220?key=ZMM2U9XUSJ6UV37L4L49NQACY&model=weatherRadarSubhourly_location&altitude=0&refresh=true&nocache=1715977236564`,
-      // url : "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/36.7591,-95.3833/2024-05-24/2024-05-31?key=3C8TRCWYPKSPU83H6U8CJ5CUR&unitGroup=metric&elements=%2Breflectivity&include=minutes,current&options=subhourlyfcst&iconSet=icons2",
-      headers: {}
-    };
+  // async function getRadarTiles() {
+  //   const currentTime = new Date().toISOString();
+  //   let config = {
+  //     method: 'get',
+  //     maxBodyLength: Infinity,
+  //     url: `https://weather1.visualcrossing.com/VisualCrossingWebServices/rest/services/retrievetile/reflectivity/6/13/25/202405172220?key=ZMM2U9XUSJ6UV37L4L49NQACY&model=weatherRadarSubhourly_location&altitude=0&refresh=true&nocache=1715977236564`,
+  //     // url : "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/36.7591,-95.3833/2024-05-24/2024-05-31?key=3C8TRCWYPKSPU83H6U8CJ5CUR&unitGroup=metric&elements=%2Breflectivity&include=minutes,current&options=subhourlyfcst&iconSet=icons2",
+  //     headers: {}
+  //   };
 
-    try {
-      const response = await axios.request(config);
-      console.log(response)
-      setRadarTile(response)
-    } catch (error) {
-      console.log(error);
-      return null;
-    }
-  }
+  //   try {
+  //     const response = await axios.request(config);
+  //     console.log(response)
+  //     setRadarTile(response)
+  //   } catch (error) {
+  //     console.log(error);
+  //     return null;
+  //   }
+  // }
 
   async function map_API_Geo2Location(lng, lat) {
     let config = {
@@ -735,8 +740,8 @@ const Map = () => {
       <div className="radar-frame-container">
         <FontAwesomeIcon className='radar-frame-icon' icon={faArrowLeft} onClick={backRadarFrame} />
         <div >
-          <div style={{ color: 'white', textAlign: 'center' }}>{convertTimestamp(radarTime.toISOString()).slice(11, 15)}</div>
-          <div style={{ color: 'white' }}>{convertTimestamp(radarTime.toISOString()).slice(0, 10)}</div>
+          <div style={{ color: 'white', textAlign: 'center' }}>{convertTimestamp(radarTime.toISOString()).slice(12, 16)}</div>
+          <div style={{ color: 'white' }}>{convertTimestamp(radarTime.toISOString()).slice(0, 12)}</div>
         </div>
 
         <FontAwesomeIcon className='radar-frame-icon' icon={faArrowRight} onClick={forwardRadarFrame} />
