@@ -216,11 +216,9 @@ const Map = () => {
   }
 
   function convertRadarTimestamp(isoTimestamp) {
-
-    // Get the current time in the United States
-    const timestamp = new Date();
-    // Format the time in the US Eastern Time Zone
-    const currentUSTime = timestamp.toLocaleString("en-US", {
+    const fakeTime = new Date(isoTimestamp)
+    console.log(fakeTime)
+    const currentUSTime = fakeTime.toLocaleString("en-US", {
       timeZone: "America/New_York",
       year: "numeric",
       month: "numeric",
@@ -229,10 +227,7 @@ const Map = () => {
       minute: "numeric"
     });
 
-    console.log("Current time in the US:", currentUSTime);
-
     const dateTime = new Date(currentUSTime);
-
     // Format the date and time to the desired format
     const year = dateTime.getFullYear().toString();
     const month = (dateTime.getMonth() + 1).toString().padStart(2, '0');
